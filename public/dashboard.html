@@ -1,0 +1,1301 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buscador de Bujes Schettino | Sistema Interno</title>
+    
+    <link rel="icon" type="image/png" href="https://i.ibb.co/CpXzP1GB/ISOTIPO-2.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Syncopate:wght@700;800&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        schettino: { yellow: '#f3be12', dark: '#0d0d0d', card: '#141414', accent: '#262626', bronze: '#d4af37' }
+                    },
+                    fontFamily: { industrial: ['Syncopate', 'sans-serif'], sans: ['Inter', 'sans-serif'] }
+                }
+            }
+        }
+
+    </script>
+
+    <style>
+        body { background-color: #0d0d0d; color: #e5e5e5; font-family: 'Inter', sans-serif; }
+        .logo-glow { filter: drop-shadow(0px 0px 8px rgba(243, 190, 18, 0.45)); transition: filter 0.3s ease; }
+        .glass-panel { background: rgba(20, 20, 20, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .glass-card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(12px); border: 1px solid rgba(243, 190, 18, 0.18); transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        .glass-card:hover { border-color: rgba(243, 190, 18, 0.7); box-shadow: 0 10px 30px -10px rgba(243, 190, 18, 0.3); transform: translateY(-6px); }
+        .btn-mat-todos { background: linear-gradient(135deg, #f3be12 0%, #e0a800 100%); color: #000; box-shadow: 0 4px 20px rgba(243, 190, 18, 0.3); }
+        .btn-mat-hule { background: linear-gradient(135deg, #4a4a4a 0%, #222222 100%); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.2); box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); }
+        .btn-mat-bronce { background: linear-gradient(135deg, #e6c667 0%, #b8860b 50%, #8b6508 100%); color: #000000; border: 1px solid rgba(255, 223, 0, 0.5); box-shadow: 0 4px 20px rgba(184, 134, 11, 0.4); }
+        @keyframes spinSlow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .spin-isotipo { animation: spinSlow 4s linear infinite; }
+        @keyframes floatBot { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-8px); } }
+        .animate-float-bot { animation: floatBot 3.5s ease-in-out infinite; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #0a0a0a; }
+        ::-webkit-scrollbar-thumb { background: #f3be12; border-radius: 3px; }
+
+        @keyframes spinSlow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .spin-isotipo {
+            animation: spinSlow 3s linear infinite;
+        }
+    </style>
+</head>
+<body class="overflow-x-hidden selection:bg-schettino-yellow selection:text-black">
+
+    <!-- PRELOADER CORPORATIVO -->
+    <div id="preloader" class="fixed inset-0 z-[10000] bg-black flex flex-col items-center justify-center transition-opacity duration-700">
+        <div class="relative w-32 h-32 flex items-center justify-center">
+            <img src="https://i.ibb.co/CpXzP1GB/ISOTIPO-2.png" alt="Cargando..." class="w-28 h-28 object-contain spin-isotipo logo-glow">
+            <div class="absolute inset-0 rounded-full border-2 border-dashed border-schettino-yellow/40 animate-spin" style="animation-duration: 8s;"></div>
+        </div>
+        <div class="mt-6 text-center">
+            <p class="font-industrial text-xs text-schettino-yellow tracking-widest uppercase animate-pulse">Fábrica de Bujes Schettino</p>
+            <p class="text-[10px] text-gray-500 font-mono mt-1">Cargando Buscador de bujes...</p>
+        </div>
+    </div>
+
+    <!-- NAVBAR CORPORATIVO -->
+    <nav class="fixed top-0 left-0 w-full z-50 glass-panel border-b border-white/10 transition-all duration-300" id="navbar">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
+            <a href="#" class="flex items-center space-x-3 group">
+                <img src="https://i.ibb.co/5xcnxmfB/Horizontal-LOGO.png" alt="Schettino Horizontal" class="h-8 sm:h-10 w-auto object-contain logo-glow">
+            </a>
+            <div class="flex items-center space-x-3 text-xs font-industrial tracking-widest text-gray-300" id="navAdminContainer">
+                <a href="#catalogo" class="hover:text-schettino-yellow transition-colors relative py-2 hidden sm:inline">BUSCADOR</a>
+                <a href="#tablaGeneral" class="hover:text-schettino-yellow transition-colors relative py-2 hidden sm:inline">REGISTRO COMPLETO</a>
+                
+                <button onclick="cerrarSesion()" class="bg-red-600/20 hover:bg-red-600 text-red-400 hover:text-white px-3 py-1.5 rounded-xl font-industrial text-[10px] font-bold transition-all border border-red-500/30 flex items-center space-x-1">
+                    <i class="fas fa-right-from-bracket"></i><span>SALIR</span>
+                </button>
+
+                <span class="bg-schettino-yellow/20 text-schettino-yellow px-3 py-1 rounded text-[10px] border border-schettino-yellow/40 flex items-center space-x-1.5">
+                    <span class="w-2 h-2 rounded-full bg-schettino-yellow animate-ping"></span>
+                    <span id="roleBadgeText">FABRICANTE</span>
+                </span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- SECCIÓN CATÁLOGO MODULAR -->
+    <section id="catalogo" class="py-28 bg-[#080808] border-y border-white/10 relative min-h-screen">
+        <div class="max-w-7xl mx-auto px-6">
+            
+            <div class="text-center max-w-3xl mx-auto mb-8" data-aos="fade-up">
+                <p class="text-schettino-yellow font-industrial text-xs tracking-widest mb-2">// SISTEMA DE CONSULTA MULTI-MATERIAL Y PLANOS TÉCNICOS</p>
+                <h2 class="font-industrial text-3xl sm:text-4xl text-white uppercase">Catálogo Interno de Bujes</h2>
+                <div class="w-20 h-1 bg-schettino-yellow mx-auto mt-4"></div>
+            </div>
+
+            <!-- SELECTOR DE MATERIALES -->
+            <div class="max-w-3xl mx-auto mb-10" data-aos="fade-up">
+                <p class="text-[11px] font-industrial text-center text-gray-400 mb-3 tracking-widest uppercase">// SELECCIONE EL MATERIAL DE BUJE QUE DESEA CONSULTAR</p>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 p-2 bg-black/60 glass-panel rounded-2xl border border-white/10">
+                    <button id="btnMatTodos" onclick="filtrarPorMaterial('TODOS')" class="btn-mat-todos py-3 px-4 rounded-xl font-industrial text-xs font-bold tracking-wider flex items-center justify-center space-x-2 transition-all transform hover:scale-105">
+                        <i class="fas fa-boxes"></i><span>TODOS LOS BUJES</span>
+                    </button>
+                    <button id="btnMatHule" onclick="filtrarPorMaterial('HULE')" class="btn-mat-hule opacity-60 hover:opacity-100 py-3 px-4 rounded-xl font-industrial text-xs font-bold tracking-wider flex items-center justify-center space-x-2 transition-all transform hover:scale-105">
+                        <i class="fas fa-circle-dot"></i><span>BUJES DE HULE</span>
+                    </button>
+                    <button id="btnMatBronce" onclick="filtrarPorMaterial('BRONCE')" class="btn-mat-bronce opacity-60 hover:opacity-100 py-3 px-4 rounded-xl font-industrial text-xs font-bold tracking-wider flex items-center justify-center space-x-2 transition-all transform hover:scale-105">
+                        <i class="fas fa-cubes"></i><span>BUJES DE BRONCE</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- BOTONES MOSTRAR / OCULTAR FICHAS -->
+            <div class="glass-panel p-6 rounded-3xl mb-8 border border-schettino-yellow/30 text-center space-y-4 shadow-xl" data-aos="fade-up">
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                    <button id="btnMostrarFichas" onclick="toggleMostrarFichas(true)" class="w-full sm:w-auto px-6 py-3.5 bg-schettino-yellow hover:bg-yellow-400 text-black font-industrial text-xs font-bold rounded-xl transition-all shadow-lg flex items-center justify-center space-x-2">
+                        <i class="fas fa-th-large"></i><span>MOSTRAR FICHAS TÉCNICAS DE CLAVES ALMACENADAS</span>
+                    </button>
+                    <button id="btnOcultarFichas" onclick="toggleMostrarFichas(false)" class="w-full sm:w-auto px-6 py-3.5 bg-white/10 hover:bg-red-600/80 hover:text-white text-gray-300 font-industrial text-xs rounded-xl transition-all flex items-center justify-center space-x-2 border border-white/10">
+                        <i class="fas fa-eye-slash"></i><span>OCULTAR FICHAS TÉCNICAS</span>
+                    </button>
+                </div>
+                <p id="statusFichasMsg" class="text-xs text-gray-400 font-mono">
+                    <i class="fas fa-info-circle text-schettino-yellow mr-1"></i> Fabricando Soluciones...
+                </p>
+            </div>
+
+            <!-- PANEL DE FILTROS Y BÚSQUEDA -->
+            <div class="glass-panel p-6 rounded-3xl mb-10 border border-white/10 space-y-4 relative z-30" data-aos="fade-up">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-end">
+                    <div class="lg:col-span-3">
+                        <label class="block text-[10px] font-industrial text-schettino-yellow mb-1">1. TIPO DE BUJE (OPCIONAL)</label>
+                        <select id="filterTipo" onchange="alCambiarTipo()" class="w-full px-4 py-3 bg-black/60 border border-white/15 rounded-xl text-white text-sm focus:border-schettino-yellow focus:outline-none transition-all">
+                            <option value="">Todos los Tipos</option>
+                        </select>
+                    </div>
+
+                    <div class="lg:col-span-5 relative">
+                        <label class="block text-[10px] font-industrial text-schettino-yellow mb-1">2. ESCRIBIR Y BUSCAR CLAVE</label>
+                        <div class="flex gap-2">
+                            <div class="relative w-full">
+                                <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                                <input type="text" id="searchInput" placeholder="Buscar clave..." autocomplete="off"
+                                       onkeyup="if(event.key==='Enter') ejecutarBusquedaManual()"
+                                       oninput="alEscribirClave(this.value)"
+                                       class="w-full pl-11 pr-4 py-3 bg-black/60 border border-white/15 rounded-xl text-white text-sm focus:border-schettino-yellow focus:outline-none transition-all font-mono">
+                            </div>
+                            <button onclick="ejecutarBusquedaManual()" class="py-3 px-5 bg-schettino-yellow hover:bg-yellow-400 text-black font-industrial text-xs font-bold rounded-xl transition-all flex items-center justify-center space-x-2 shrink-0">
+                                <i class="fas fa-search"></i><span>BUSCAR</span>
+                            </button>
+                        </div>
+                        <div id="sugerenciasContainer" class="hidden absolute left-0 right-0 top-full mt-1 bg-[#121212] border border-schettino-yellow/40 rounded-xl max-h-60 overflow-y-auto z-[100] shadow-2xl"></div>
+                    </div>
+
+                    <div class="lg:col-span-3">
+                        <label class="block text-[10px] font-industrial text-schettino-yellow mb-1">3. SELECCIONAR CLAVE</label>
+                        <select id="selectClaves" onchange="alSeleccionarClave(this.value)" class="w-full px-4 py-3 bg-black/60 border border-white/15 rounded-xl text-white text-sm focus:border-schettino-yellow focus:outline-none transition-all font-mono">
+                            <option value="">Todas las Claves</option>
+                        </select>
+                    </div>
+
+                    <div class="lg:col-span-1">
+                        <button onclick="limpiarFiltros()" title="Restablecer Filtros" class="w-full py-3 px-3 glass-card text-gray-300 hover:text-schettino-yellow font-industrial text-xs rounded-xl border border-white/10 flex items-center justify-center transition-all">
+                            <i class="fas fa-undo"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="alertBuscadorContainer" class="hidden mb-8"></div>
+
+            <!-- GRID DINÁMICO DE BUJES -->
+            <div id="gridBujes" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+
+            <div id="fichasOcultasMsg" class="text-center py-16 glass-panel rounded-3xl border border-white/10 relative z-10">
+                <i class="fas fa-folder-open text-4xl text-schettino-yellow/50 mb-3"></i>
+                <p class="text-gray-300 font-industrial text-sm mb-1">Las fichas técnicas del catálogo no están desplegadas.</p>
+                <button onclick="toggleMostrarFichas(true)" class="mt-4 px-6 py-2.5 bg-schettino-yellow text-black font-industrial text-xs font-bold rounded-xl hover:bg-yellow-400 transition-all">
+                    DESPLEGAR FICHAS
+                </button>
+            </div>
+
+            <div id="noResults" class="hidden text-center py-16 glass-panel rounded-3xl border border-white/10">
+                <i class="fas fa-search text-4xl text-schettino-yellow/50 mb-3"></i>
+                <p class="text-gray-300 font-industrial text-sm">No se encontraron bujes con los criterios especificados.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECCIÓN: TABLA GENERAL -->
+    <section id="tablaGeneral" class="py-20 bg-black border-b border-white/10">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
+                <div>
+                    <p class="text-schettino-yellow font-industrial text-xs tracking-widest mb-1">// BASE DE DATOS COMPLETA MULTI-MATERIAL</p>
+                    <h3 class="font-industrial text-2xl text-white uppercase">Registro General de Claves</h3>
+                </div>
+                
+                <div class="flex flex-wrap gap-2 items-center">
+                    <button onclick="mostrarTodasLasClaves()" class="px-4 py-2 bg-schettino-yellow hover:bg-yellow-400 text-black font-industrial text-xs font-bold rounded-xl transition-all flex items-center space-x-1.5 shadow-lg">
+                        <i class="fas fa-eye"></i><span>MOSTRAR TODAS LAS CLAVES</span>
+                    </button>
+                    <button onclick="ocultarTodasLasClaves()" class="px-4 py-2 bg-white/10 hover:bg-red-600 hover:text-white text-gray-300 font-industrial text-xs rounded-xl transition-all flex items-center space-x-1.5">
+                        <i class="fas fa-eye-slash"></i>
+                        <span>OCULTAR TODAS LAS CLAVES EXISTENTES</span>
+                    </button>
+                    <div class="w-full md:w-60 relative mt-2 md:mt-0">
+                        <input type="text" id="searchTabla" oninput="filtrarTablaGeneral(this.value)" placeholder="Filtrar en tabla..." class="w-full px-4 py-2 bg-black/60 border border-white/15 rounded-xl text-white text-xs focus:border-schettino-yellow focus:outline-none font-mono">
+                    </div>
+                </div>
+            </div>
+
+            <div id="contenedorTabla" class="glass-panel rounded-2xl border border-white/10 overflow-hidden">
+                <div class="overflow-x-auto max-h-[600px] overflow-y-auto">
+                    <table class="w-full text-left border-collapse text-xs font-mono">
+                        <thead class="sticky top-0 z-10">
+                            <tr class="bg-black/95 border-b border-white/10 text-schettino-yellow font-industrial text-[10px]">
+                                <th class="py-3 px-4">CLAVE</th>
+                                <th class="py-3 px-4">MATERIAL</th>
+                                <th class="py-3 px-4">TIPO</th>
+                                <th class="py-3 px-4">ESPECIFICACIONES / MEDIDAS</th>
+                                <th class="py-3 px-4 text-center">ESTADO PLANO</th>
+                                <th class="py-3 px-4 text-center">ACCIONES</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyGeneral" class="divide-y divide-white/5 text-gray-300"></tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="mt-4 flex justify-between items-center text-xs text-gray-400">
+                <span id="infoTotalTabla">Cargando registros desde la Base de Datos...</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- MODAL VISOR DE PLANOS TÉCNICOS (ESTRUCTURA CORREGIDA) -->
+    <div id="modalPlano" class="fixed inset-0 z-[9999] bg-black/95 backdrop-blur-md hidden flex flex-col p-2 sm:p-4 md:p-6">
+        <div class="flex justify-between items-center pb-3 mb-2 border-b border-white/10 shrink-0">
+            <div class="flex items-center space-x-3">
+                <span id="modalMatBadge" class="bg-schettino-yellow/20 text-schettino-yellow font-industrial text-[10px] px-3 py-1 rounded-md border border-schettino-yellow/30">MATERIAL</span>
+                <span id="modalTipoBadge" class="bg-white/10 text-gray-300 font-industrial text-[10px] px-3 py-1 rounded-md border border-white/20">TIPO</span>
+                <h3 id="modalClave" class="font-industrial text-xl sm:text-2xl text-white font-bold tracking-wider">CLAVE</h3>
+            </div>
+            <button onclick="cerrarModalPlano()" class="w-9 h-9 rounded-full bg-white/10 hover:bg-red-600 text-white flex items-center justify-center transition-all">
+                <i class="fas fa-times text-base"></i>
+            </button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 h-full min-h-0 flex-1 overflow-hidden">
+            <!-- COLUMNA IZQUIERDA: VISOR DE PLANO + BOTÓN GIRAR -->
+            <div class="lg:col-span-8 bg-black rounded-2xl border border-white/10 p-2 flex flex-col items-center justify-center relative overflow-hidden h-full min-h-[380px] shadow-2xl">
+                <iframe id="iframePlano" src="" class="w-full h-full rounded-xl border-0 bg-neutral-900" allow="autoplay"></iframe>
+                
+                <div id="noPlanoAlert" class="hidden flex flex-col items-center justify-center p-8 text-center max-w-md">
+                    <div class="w-16 h-16 rounded-full bg-amber-500/10 border border-amber-500/40 text-amber-400 flex items-center justify-center text-2xl mb-4 animate-bounce">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <h4 class="font-industrial text-lg text-amber-400 mb-2">PLANO TÉCNICO NO DISPONIBLE</h4>
+                    <p class="text-xs text-gray-400 font-mono leading-relaxed mb-4">
+                        No se cuenta con plano digitalizado registrado para esta clave en el catálogo maestro. Puede verificar las especificaciones físicas en el panel lateral.
+                    </p>
+                </div>
+
+                <div id="modalBarraDrive" class="absolute bottom-3 left-3 right-3 bg-black/90 px-4 py-2 rounded-xl border border-white/10 flex justify-between items-center text-[10px]">
+                    <span class="text-gray-400 font-mono"><i class="fas fa-info-circle text-schettino-yellow mr-1"></i> Visualizador de Planos</span>
+                    <div class="flex items-center space-x-3">
+                        <button onclick="girarPlano()" class="text-schettino-yellow hover:text-white font-industrial flex items-center space-x-1 bg-white/10 px-2.5 py-1 rounded-lg transition-all shadow">
+                            <i class="fas fa-rotate-right"></i><span>GIRAR</span>
+                        </button>
+                        <a id="btnPlanoDirecto" href="#" target="_blank" class="text-schettino-yellow hover:underline font-industrial">ABRIR EN PESTAÑA NUEVA</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- COLUMNA DERECHA: FICHA DE ESPECIFICACIONES -->
+            <div class="lg:col-span-4 flex flex-col justify-between space-y-4 text-xs h-full overflow-y-auto glass-panel p-5 rounded-2xl border border-white/10">
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between border-b border-white/10 pb-2">
+                        <p class="font-industrial text-schettino-yellow text-xs">// FICHA DE ESPECIFICACIONES</p>
+                        <i class="fas fa-industry text-schettino-yellow/70"></i>
+                    </div>
+                    <div id="modalMedidasContainer" class="space-y-3 text-gray-300 font-mono bg-black/60 p-4 rounded-xl border border-white/10"></div>
+                </div>
+
+                <div class="p-4 rounded-xl bg-black/80 border border-schettino-yellow/30 space-y-2 mt-4 shadow-xl">
+                    <p class="font-industrial text-[10px] text-schettino-yellow flex items-center space-x-1.5">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>CONTROL DE CALIDAD SCHETTINO</span>
+                    </p>
+                    <p class="text-[11px] text-gray-400 font-mono leading-relaxed">
+                        Las dimensiones mostradas corresponden al registro oficial en milímetros/pulgadas según norma de fabricación.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL CORPORATIVO: GESTIÓN DE BUJES (CREAR / EDITAR) -->
+    <div id="modalBujeForm" class="fixed inset-0 z-[10000] bg-black/95 backdrop-blur-md hidden flex items-center justify-center p-4">
+        <div class="glass-panel max-w-lg w-full p-6 sm:p-8 rounded-3xl border border-schettino-yellow/40 shadow-2xl relative">
+            <div class="flex justify-between items-center pb-4 mb-4 border-b border-white/10">
+                <h3 id="modalBujeTitulo" class="font-industrial text-lg text-white font-bold uppercase tracking-wider">REGISTRAR NUEVO BUJE</h3>
+                <button onclick="cerrarModalBuje()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-red-600 text-white flex items-center justify-center transition-all">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <form id="formBuje" onsubmit="guardarBujeForm(event)" class="space-y-4 text-xs font-mono">
+                <input type="hidden" id="bujeId">
+                <input type="hidden" id="bujeOriginalMaterial">
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-[10px] font-industrial text-schettino-yellow mb-1">MATERIAL</label>
+                        <select id="inputMaterial" onchange="cambiarCamposMaterial()" class="w-full px-3 py-2.5 bg-black/80 border border-white/20 rounded-xl text-white text-xs focus:border-schettino-yellow focus:outline-none">
+                            <option value="HULE">HULE</option>
+                            <option value="BRONCE">BRONCE</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-industrial text-schettino-yellow mb-1">CLAVE</label>
+                        <input type="text" id="inputClave" placeholder="Ej. RB-100R" required class="w-full px-3 py-2.5 bg-black/80 border border-white/20 rounded-xl text-white text-xs focus:border-schettino-yellow focus:outline-none uppercase">
+                    </div>
+                </div>
+
+                <div id="camposHule" class="space-y-3">
+                    <div>
+                        <label class="block text-[10px] font-industrial text-schettino-yellow mb-1">TIPO</label>
+                        <input type="text" id="inputTipoHule" placeholder="Ej. A, B, C" class="w-full px-3 py-2.5 bg-black/80 border border-white/20 rounded-xl text-white text-xs focus:border-schettino-yellow focus:outline-none uppercase">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[9px] text-gray-400 mb-1">DIÁMETRO EXTERIOR</label>
+                            <input type="text" id="inputDiamExt" placeholder="Ej. 1.687" class="w-full px-3 py-2 bg-black/80 border border-white/20 rounded-xl text-white text-xs focus:border-schettino-yellow focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[9px] text-gray-400 mb-1">LARGO EXTERIOR</label>
+                            <input type="text" id="inputLargoExt" placeholder="Ej. 2.531" class="w-full px-3 py-2 bg-black/80 border border-white/20 rounded-xl text-white text-xs focus:border-schettino-yellow focus:outline-none">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[9px] text-gray-400 mb-1">LARGO INTERIOR</label>
+                            <input type="text" id="inputLargoInt" placeholder="Ej. 2.75" class="w-full px-3 py-2 bg-black/80 border border-white/20 rounded-xl text-white text-xs focus:border-schettino-yellow focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[9px] text-gray-400 mb-1">DIÁMETRO INTERIOR</label>
+                            <input type="text" id="inputDiamInt" placeholder="Ej. 0.75" class="w-full px-3 py-2 bg-black/80 border border-white/20 rounded-xl text-white text-xs focus:border-schettino-yellow focus:outline-none">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[9px] text-gray-400 mb-1">CEJA</label>
+                        <input type="text" id="inputCeja" placeholder="Ej. 1.875" class="w-full px-3 py-2 bg-black/80 border border-white/20 rounded-xl text-white text-xs focus:border-schettino-yellow focus:outline-none">
+                    </div>
+                </div>
+
+                <div id="camposBronce" class="space-y-3 hidden">
+                    <div class="grid grid-cols-3 gap-2">
+                        <div>
+                            <label class="block text-[9px] text-gray-400 mb-1">DIAM. (A)</label>
+                            <input type="text" id="inputDiamA" placeholder="Ej. 0.750" class="w-full px-3 py-2 bg-black/80 border border-white/20 rounded-xl text-white text-xs focus:border-schettino-yellow focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[9px] text-gray-400 mb-1">DIAM. (B)</label>
+                            <input type="text" id="inputDiamB" placeholder="Ej. 0.562" class="w-full px-3 py-2 bg-black/80 border border-white/20 rounded-xl text-white text-xs focus:border-schettino-yellow focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[9px] text-gray-400 mb-1">LONG. (C)</label>
+                            <input type="text" id="inputLongC" placeholder="Ej. 1.719" class="w-full px-3 py-2 bg-black/80 border border-white/20 rounded-xl text-white text-xs focus:border-schettino-yellow focus:outline-none">
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-industrial text-schettino-yellow mb-1">URL DEL PLANO (GOOGLE DRIVE)</label>
+                    <input type="text" id="inputPlanoUrl" placeholder="https://drive.google.com/..." class="w-full px-3 py-2.5 bg-black/80 border border-white/20 rounded-xl text-white text-xs focus:border-schettino-yellow focus:outline-none">
+                </div>
+
+                <button type="submit" class="w-full py-3.5 bg-schettino-yellow hover:bg-yellow-400 text-black font-industrial text-xs font-bold rounded-xl transition-all shadow-lg flex items-center justify-center space-x-2 mt-4">
+                    <i class="fas fa-save"></i><span>GUARDAR REGISTRO</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL CORPORATIVO: GESTIÓN DE USUARIOS -->
+    <div id="modalUsuarios" class="fixed inset-0 z-[10000] bg-black/95 backdrop-blur-md hidden flex items-center justify-center p-4">
+        <div class="glass-panel max-w-xl w-full p-6 sm:p-8 rounded-3xl border border-schettino-yellow/40 shadow-2xl relative">
+            <div class="flex justify-between items-center pb-4 mb-4 border-b border-white/10">
+                <h3 class="font-industrial text-lg text-white font-bold uppercase tracking-wider">PANEL DE CONTROL DE USUARIOS</h3>
+                <button onclick="cerrarModalUsuarios()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-red-600 text-white flex items-center justify-center transition-all">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="space-y-4 text-xs font-mono">
+                <div class="bg-black/60 p-4 rounded-xl border border-white/10 max-h-48 overflow-y-auto">
+                    <p class="font-industrial text-[10px] text-schettino-yellow mb-2">// USUARIOS ACTIVOS EN EL SISTEMA</p>
+                    <div id="listaUsuariosContainer" class="space-y-2"></div>
+                </div>
+
+                <div class="border-t border-white/10 pt-4">
+                    <p class="font-industrial text-[10px] text-schettino-yellow mb-3">// CREAR NUEVO USUARIO CORPORATIVO</p>
+                    <form onsubmit="crearNuevoUsuarioForm(event)" class="space-y-3">
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-[9px] text-gray-400 mb-1">NOMBRE DE USUARIO</label>
+                                <input type="text" id="nuevoUser" required placeholder="Ej. operador2" class="w-full px-3 py-2 bg-black/80 border border-white/20 rounded-xl text-white text-xs focus:border-schettino-yellow focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-[9px] text-gray-400 mb-1">CORREO ELECTRÓNICO</label>
+                                <input type="email" id="nuevoEmail" required placeholder="user@schettino.com" class="w-full px-3 py-2 bg-black/80 border border-white/20 rounded-xl text-white text-xs focus:border-schettino-yellow focus:outline-none">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-[9px] text-gray-400 mb-1">CONTRASEÑA TEMPORAL</label>
+                                <input type="password" id="nuevoPass" required placeholder="••••••••" class="w-full px-3 py-2 bg-black/80 border border-white/20 rounded-xl text-white text-xs focus:border-schettino-yellow focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-[9px] text-gray-400 mb-1">ROL DEL SISTEMA</label>
+                                <select id="nuevoRol" class="w-full px-3 py-2 bg-black/80 border border-white/20 rounded-xl text-white text-xs focus:border-schettino-yellow focus:outline-none">
+                                    <option value="fabricante">FABRICANTE (Sólo lectura)</option>
+                                    <option value="admin">ADMINISTRADOR (Plenos poderes)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="submit" class="w-full py-3 bg-schettino-yellow hover:bg-yellow-400 text-black font-industrial text-xs font-bold rounded-xl transition-all shadow-lg flex items-center justify-center space-x-2">
+                            <i class="fas fa-user-plus"></i><span>REGISTRAR USUARIO</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+<!-- MODAL CORPORATIVO: CAMBIAR CONTRASEÑA -->
+    <div id="modalCambiarPassword" class="fixed inset-0 z-[10005] bg-black/95 backdrop-blur-md hidden flex items-center justify-center p-4">
+        <div class="glass-panel max-w-md w-full p-6 sm:p-8 rounded-3xl border border-schettino-yellow/40 shadow-2xl relative">
+            <div class="flex justify-between items-center pb-4 mb-4 border-b border-white/10">
+                <h3 id="modalPassTitulo" class="font-industrial text-base text-white font-bold uppercase tracking-wider">CAMBIAR CONTRASEÑA</h3>
+                <button onclick="cerrarModalPassword()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-red-600 text-white flex items-center justify-center transition-all">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <form id="formCambiarPassword" onsubmit="ejecutarCambioPassword(event)" class="space-y-4 text-xs font-mono">
+                <input type="hidden" id="passUserId">
+
+                <div>
+                    <label class="block text-[10px] font-industrial text-schettino-yellow mb-1">NUEVA CONTRASEÑA</label>
+                    <input type="password" id="inputNuevaPass" required placeholder="••••••••" class="w-full px-3 py-3 bg-black/80 border border-white/20 rounded-xl text-white text-xs focus:border-schettino-yellow focus:outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-industrial text-schettino-yellow mb-1">CONFIRMAR NUEVA CONTRASEÑA</label>
+                    <input type="password" id="inputConfirmarPass" required placeholder="••••••••" class="w-full px-3 py-3 bg-black/80 border border-white/20 rounded-xl text-white text-xs focus:border-schettino-yellow focus:outline-none">
+                </div>
+
+                <div id="passErrorMsg" class="hidden text-xs text-red-400 bg-red-950/40 border border-red-500/30 p-2.5 rounded-xl">
+                    <i class="fas fa-exclamation-triangle mr-1"></i> <span id="passErrorText">Las contraseñas no coinciden.</span>
+                </div>
+
+                <button type="submit" class="w-full py-3.5 bg-schettino-yellow hover:bg-yellow-400 text-black font-industrial text-xs font-bold rounded-xl transition-all shadow-lg flex items-center justify-center space-x-2 mt-4">
+                    <i class="fas fa-save"></i><span>ACTUALIZAR CONTRASEÑA</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+
+
+    <!-- WIDGET INTEGRADO: BUJEBOT -->
+    <div class="fixed bottom-20 right-6 z-[9000] flex items-end space-x-3 pointer-events-auto">
+        <div id="botTooltip" class="glass-panel py-2 px-3.5 rounded-2xl border border-schettino-yellow/40 text-xs font-mono text-gray-200 shadow-2xl animate-bounce hidden sm:block">
+            <span class="text-schettino-yellow font-bold">🛈</span> Buscador Interno Listo
+        </div>
+
+        <div class="relative group cursor-pointer" onclick="animarBujeBot()">
+            <div class="absolute -inset-1 rounded-full bg-schettino-yellow/40 blur animate-pulse"></div>
+            <div class="relative w-14 h-14 sm:w-16 sm:h-16 rounded-full p-0.5 bg-gradient-to-tr from-schettino-yellow via-yellow-200 to-black overflow-hidden shadow-2xl border-2 border-schettino-yellow animate-float-bot">
+                <img src="https://i.ibb.co/8DD5Xnx8/perfil.png" alt="BujeBot" class="w-full h-full object-cover rounded-full group-hover:scale-110 transition-transform duration-300">
+            </div>
+            <span class="absolute bottom-0 right-0 w-4 h-4 rounded-full bg-emerald-500 border-2 border-black flex items-center justify-center">
+                <span class="w-1.5 h-1.5 rounded-full bg-white"></span>
+            </span>
+        </div>
+    </div>
+
+    <!-- FOOTER CORPORATIVO -->
+    <footer id="contacto" class="bg-black text-gray-500 relative border-t border-white/10 overflow-hidden">
+        <div class="max-w-7xl mx-auto px-6 py-8">
+            <div class="flex flex-col sm:flex-row justify-between items-center text-xs font-light gap-2">
+                <p>&copy; BUJES AUTOMOTRICES DEL GOLFO S. DE R. L. MI. • Grupo Schettino. Todos los derechos reservados.</p>
+                <span class="text-[10px] font-mono text-schettino-yellow/70">PLATAFORMA TÉCNICA DE CONSULTA INTERNA</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- SCRIPT DE LÓGICA Y CONEXIÓN CON LA API -->
+    <script>
+
+        document.addEventListener("DOMContentLoaded", async () => {
+            usuarioSesion = JSON.parse(localStorage.getItem("usuarioSchettino"));
+            
+            if (!usuarioSesion) {
+                window.location.href = "index.html";
+                return;
+            }
+
+            const badgeRol = document.getElementById("roleBadgeText");
+            if (badgeRol) {
+                badgeRol.textContent = (usuarioSesion.rol || "FABRICANTE").toUpperCase();
+            }
+
+            if (usuarioSesion.rol === 'admin') {
+                construirMenuAdmin();
+            }
+
+            AOS.init({ duration: 800, once: true });
+            
+            // 1. Cargamos los datos de los bujes desde la base de datos
+            await cargarDatosBujes();
+
+            // 2. UNA VEZ CARGADO TODO, OCULTAMOS EL PRELOADER SUAVEMENTE
+            const preloader = document.getElementById('preloader');
+            if (preloader) {
+                preloader.style.opacity = '0';
+                setTimeout(() => {
+                    preloader.style.display = 'none';
+                }, 700); // Coincide con la duración de la transición de opacidad
+            }
+        });
+
+
+        let materialFiltroActual = 'TODOS';
+        let mostrarFichasActivas = false;
+        let bujesTodos = [];
+        let gradosRotacion = 0;
+
+        const nombresEtiquetas = {
+            'DIAM_EXT': 'DIAM. (A) (+.010)(-.000)',
+            'LARGO_EXT': 'LONG. (±.010)',
+            'LARGO_INT': 'DIAM. (B) (+.015)(-.000)',
+            'DIAM_INT': 'DIÁMETRO INTERIOR',
+            'CEJA': 'CEJA',
+            'DIAMETRO_EXTERIOR': 'DIAM. (A) (+.010)(-.000)',
+            'LARGO_EXTERIOR': 'LONG. (±.010)',
+            'DIAMETRO_INTERIOR': 'DIÁMETRO INTERIOR',
+            'LARGO_INTERIOR': 'DIAM. (B) (+.015)(-.000)',
+            'DIAM. (A) (+.010)(-.000)': 'DIAM. (A) (+.010)(-.000)',
+            'DIAM. (B) (+.015)(-.000)': 'DIAM. (B) (+.015)(-.000)',
+            'LONG. (±.010)': 'LONG. (±.010)'
+        };
+
+        let usuarioSesion = null;
+
+        function cerrarSesion() {
+            localStorage.removeItem("usuarioSchettino");
+            window.location.href = "index.html";
+        }
+
+        function construirMenuAdmin() {
+            const container = document.getElementById("navAdminContainer");
+            if (container) {
+                const btnNuevo = document.createElement("button");
+                btnNuevo.className = "bg-schettino-yellow hover:bg-yellow-400 text-black px-3 py-1.5 rounded-xl font-industrial text-[10px] font-bold transition-all flex items-center space-x-1 shadow-lg";
+                btnNuevo.innerHTML = '<i class="fas fa-plus"></i><span>NUEVO BUJE</span>';
+                btnNuevo.onclick = abrirModalCrearBuje;
+                container.insertBefore(btnNuevo, container.firstChild);
+
+                const btnUsers = document.createElement("button");
+                btnUsers.className = "bg-white/10 hover:bg-white/20 text-schettino-yellow px-3 py-1.5 rounded-xl font-industrial text-[10px] font-bold transition-all flex items-center space-x-1 border border-schettino-yellow/30";
+                btnUsers.innerHTML = '<i class="fas fa-users-gear"></i><span>USUARIOS</span>';
+                btnUsers.onclick = abrirModalUsuarios;
+                container.insertBefore(btnUsers, container.firstChild);
+            }
+        }
+
+        async function cargarDatosBujes() {
+            try {
+                const [resHule, resBronce] = await Promise.all([
+                    fetch('/api/bujes-hule'),
+                    fetch('/api/bujes-bronce')
+                ]);
+                const dataHule = await resHule.json();
+                const dataBronce = await resBronce.json();
+                bujesTodos = [
+                    ...(Array.isArray(dataHule) ? dataHule : []), 
+                    ...(Array.isArray(dataBronce) ? dataBronce : [])
+                ];
+            } catch (err) {
+                console.error("Error al cargar bujes:", err);
+                bujesTodos = [];
+            }
+            poblarSelectorTipos();
+            poblarSelectorClaves(bujesTodos);
+            mostrarTodasLasClaves();
+            toggleMostrarFichas(true);
+        }
+
+        function filtrarPorMaterial(mat) {
+            materialFiltroActual = mat;
+            ocultarAlertaBuscador();
+
+            document.getElementById("btnMatTodos").classList.toggle("opacity-60", mat !== 'TODOS');
+            document.getElementById("btnMatHule").classList.toggle("opacity-60", mat !== 'HULE');
+            document.getElementById("btnMatBronce").classList.toggle("opacity-60", mat !== 'BRONCE');
+
+            poblarSelectorTipos();
+            const lista = obtenerBujesFiltrados();
+            poblarSelectorClaves(lista);
+            if (mostrarFichasActivas) renderizarGridBujes(lista);
+            renderizarTablaGeneral(lista);
+        }
+
+        function obtenerBujesFiltrados() {
+            if (materialFiltroActual === 'HULE') return bujesTodos.filter(b => b.MATERIAL === 'HULE');
+            if (materialFiltroActual === 'BRONCE') return bujesTodos.filter(b => b.MATERIAL === 'BRONCE');
+            return bujesTodos;
+        }
+
+        function toggleMostrarFichas(mostrar) {
+            mostrarFichasActivas = mostrar;
+            document.getElementById("gridBujes").classList.toggle("hidden", !mostrar);
+            document.getElementById("fichasOcultasMsg").classList.toggle("hidden", mostrar);
+            if (mostrar) renderizarGridBujes(obtenerBujesFiltrados());
+        }
+
+        function ocultarAlertaBuscador() {
+            const container = document.getElementById("alertBuscadorContainer");
+            container.innerHTML = "";
+            container.classList.add("hidden");
+        }
+
+        function mostrarAlertaMaterialIncorrecto(clave, materialReal) {
+            const container = document.getElementById("alertBuscadorContainer");
+            container.innerHTML = `
+                <div class="glass-panel p-6 rounded-2xl border-2 border-amber-500/50 bg-amber-950/20 text-center space-y-4 shadow-2xl">
+                    <div class="w-12 h-12 mx-auto rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-xl">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <h4 class="font-industrial text-sm text-amber-400">LA CLAVE "${clave.toUpperCase()}" PERTENECE A BUJES DE ${materialReal}</h4>
+                    <p class="text-xs text-gray-300 font-mono">
+                        Usted tiene seleccionado otro filtro. Debe presionar el botón de bujes de <strong class="text-schettino-yellow">${materialReal}</strong> o <strong class="text-schettino-yellow">todos los bujes</strong> para poder encontrar la clave y su respectivo plano.
+                    </p>
+                    <button onclick="filtrarPorMaterial('${materialReal}'); alSeleccionarClave('${clave}');" class="px-5 py-2.5 bg-schettino-yellow text-black font-industrial text-xs font-bold rounded-xl">
+                        CAMBIAR A BUJES DE ${materialReal} Y VER CLAVE
+                    </button>
+                </div>
+            `;
+            container.classList.remove("hidden");
+        }
+
+        function mostrarAlertaInexistente(clave) {
+            const container = document.getElementById("alertBuscadorContainer");
+            container.innerHTML = `
+                <div class="glass-panel p-6 rounded-2xl border-2 border-red-500/50 bg-red-950/20 text-center space-y-3 shadow-2xl">
+                    <h4 class="font-industrial text-sm text-red-400">CLAVE NO ENCONTRADA</h4>
+                    <p class="text-xs text-gray-300 font-mono">No existe registro con esa clave (<strong class="text-white">${clave}</strong>), podría no existir en el sistema.</p>
+                </div>
+            `;
+            container.classList.remove("hidden");
+        }
+
+        function renderizarGridBujes(lista) {
+            const grid = document.getElementById("gridBujes");
+            const noResults = document.getElementById("noResults");
+            grid.innerHTML = "";
+
+            if (!lista.length) {
+                noResults.classList.remove("hidden");
+                return;
+            }
+            noResults.classList.add("hidden");
+
+            lista.forEach(b => {
+                const tienePlano = b.P && !b.P.toLowerCase().includes("no se cuenta");
+                const card = document.createElement("div");
+                card.className = "glass-card p-5 rounded-2xl border border-white/10 flex flex-col justify-between";
+                
+                let medidasHtml = '';
+                Object.keys(b).forEach(k => {
+                    const llaveUpper = k.toUpperCase();
+                    if (!['CLAVE', 'MATERIAL', 'TIPO', 'P', 'ID', 'CREATED_AT'].includes(llaveUpper)) {
+                        const valor = b[k];
+                        if (valor !== null && valor !== undefined && valor !== '' && valor !== 'EMPTY') {
+                            medidasHtml += `
+                                <div class="flex justify-between border-b border-white/5 pb-1.5 items-center">
+                                    <span class="text-gray-400 uppercase text-[10px] tracking-wider">${k}:</span>
+                                    <strong class="text-white font-mono">${valor}</strong>
+                                </div>
+                            `;
+                        }
+                    }
+                });
+
+                let botonesAdminCard = '';
+                if (usuarioSesion && usuarioSesion.rol === 'admin') {
+                    botonesAdminCard = `
+                        <div class="mt-3 pt-3 border-t border-white/10 flex gap-2">
+                            <button onclick="abrirModalEditarBuje('${b.ID || b.id}', '${b.MATERIAL}', '${b.CLAVE}')" class="flex-1 py-1.5 bg-schettino-yellow/20 hover:bg-schettino-yellow hover:text-black text-schettino-yellow font-industrial text-[10px] rounded-xl transition-all flex items-center justify-center space-x-1">
+                                <i class="fas fa-edit"></i><span>EDITAR</span>
+                            </button>
+                            <button onclick="eliminarBuje('${b.ID || b.id}', '${b.MATERIAL}')" class="flex-1 py-1.5 bg-red-600/20 hover:bg-red-600 text-red-400 hover:text-white font-industrial text-[10px] rounded-xl transition-all flex items-center justify-center space-x-1">
+                                <i class="fas fa-trash"></i><span>ELIMINAR</span>
+                            </button>
+                        </div>
+                    `;
+                }
+
+                card.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="font-industrial text-[10px] px-2 py-0.5 rounded border bg-schettino-yellow/20 text-schettino-yellow border-schettino-yellow/30">${b.MATERIAL} • TIPO ${b.TIPO || '-'}</span>
+                            <span class="text-[10px] font-mono ${tienePlano ? 'text-emerald-400' : 'text-amber-400'}">${tienePlano ? 'Plano Ok' : 'Sin Plano'}</span>
+                        </div>
+                        <h4 class="font-industrial text-xl text-white font-bold mb-3">${b.CLAVE}</h4>
+                        <div class="grid grid-cols-2 gap-2 text-xs font-mono text-gray-300 bg-black/50 p-3 rounded-xl mb-4">${medidasHtml}</div>
+                    </div>
+                    <div>
+                        <button onclick="abrirModalPlano('${b.CLAVE}')" class="w-full py-2.5 bg-white/10 hover:bg-schettino-yellow hover:text-black text-white font-industrial text-xs rounded-xl transition-all flex items-center justify-center space-x-2 border border-white/10 mb-2">
+                            <i class="fas fa-file-lines"></i><span>VER PLANO Y MEDIDAS</span>
+                        </button>
+                        ${botonesAdminCard}
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function renderizarTablaGeneral(lista) {
+            const tbody = document.getElementById("tbodyGeneral");
+            tbody.innerHTML = "";
+            document.getElementById("infoTotalTabla").innerText = `Mostrando ${lista.length} de ${bujesTodos.length} registros totales.`;
+
+            lista.forEach(b => {
+                const tienePlano = b.P && !b.P.toLowerCase().includes("no se cuenta");
+                const tr = document.createElement("tr");
+                tr.className = "hover:bg-white/5";
+                
+                let resumenMedidas = '';
+                Object.keys(b).forEach(k => {
+                    const llaveUpper = k.toUpperCase();
+                    if (!['CLAVE', 'TIPO', 'P', 'PLANO_URL', 'PLANO', 'MATERIAL', 'ID', 'CREATED_AT'].includes(llaveUpper)) {
+                        if (b[k] !== null && b[k] !== undefined && b[k] !== '') {
+                            resumenMedidas += `${k}:${b[k]} | `;
+                        }
+                    }
+                });
+
+                let botonesAccion = `
+                    <button onclick="abrirModalPlano('${b.CLAVE}')" class="px-2.5 py-1 bg-schettino-yellow/20 hover:bg-schettino-yellow hover:text-black text-schettino-yellow font-industrial text-[10px] rounded transition-all">
+                        <i class="fas fa-eye mr-1"></i>VER
+                    </button>
+                `;
+
+                if (usuarioSesion && usuarioSesion.rol === 'admin') {
+                    botonesAccion += `
+                        <div class="flex gap-1 mt-1 justify-center">
+                            <button onclick="abrirModalEditarBuje('${b.ID || b.id}', '${b.MATERIAL}', '${b.CLAVE}')" class="px-2 py-1 bg-schettino-yellow/20 hover:bg-schettino-yellow hover:text-black text-schettino-yellow font-industrial text-[9px] rounded transition-all">
+                                <i class="fas fa-edit"></i> EDITAR
+                            </button>
+                            <button onclick="eliminarBuje('${b.ID || b.id}', '${b.MATERIAL}')" class="px-2 py-1 bg-red-600/20 hover:bg-red-600 text-red-400 hover:text-white font-industrial text-[9px] rounded transition-all">
+                                <i class="fas fa-trash"></i> ELIMINAR
+                            </button>
+                        </div>
+                    `;
+                }
+                tr.innerHTML = `
+                    <td class="py-3 px-4 font-bold text-schettino-yellow">${b.CLAVE}</td>
+                    <td class="py-3 px-4">${b.MATERIAL}</td>
+                    <td class="py-3 px-4">Tipo ${b.TIPO || '-'}</td>
+                    <td class="py-3 px-4 text-gray-300 text-[11px]">${resumenMedidas}</td>
+                    <td class="py-3 px-4 text-center"><span class="${tienePlano ? 'text-emerald-400' : 'text-amber-400'}">${tienePlano ? 'Disponible' : 'Sin Plano'}</span></td>
+                    <td class="py-3 px-4 text-center">${botonesAccion}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function abrirModalPlano(clave) {
+            const b = bujesTodos.find(item => item.CLAVE.toLowerCase() === clave.toLowerCase());
+            if (!b) return;
+
+            gradosRotacion = 0;
+            const iframe = document.getElementById("iframePlano");
+            if (iframe) iframe.style.transform = `rotate(0deg)`;
+
+            document.getElementById("modalClave").innerText = b.CLAVE;
+            document.getElementById("modalMatBadge").innerText = b.MATERIAL;
+            document.getElementById("modalTipoBadge").innerText = b.TIPO ? `TIPO - ${b.TIPO}` : `TIPO -`;
+
+            const container = document.getElementById("modalMedidasContainer");
+            container.innerHTML = "";
+
+            Object.keys(b).forEach(k => {
+                const llaveUpper = k.toUpperCase();
+                if (!['CLAVE', 'TIPO', 'P', 'PLANO_URL', 'PLANO', 'MATERIAL', 'ID', 'CREATED_AT'].includes(llaveUpper)) {
+                    const valor = b[k];
+                    if (valor !== null && valor !== undefined && valor !== '' && valor !== 'EMPTY') {
+                        let etiquetaFinal = k.toUpperCase();
+                        if (b.MATERIAL === 'BRONCE') {
+                            if (etiquetaFinal.includes('DIAM_EXT') || etiquetaFinal.includes('DIAMETRO_EXTERIOR')) {
+                                etiquetaFinal = 'DIAM. (A) (+.010)(-.000)';
+                            } else if (etiquetaFinal.includes('LARGO_EXT') || etiquetaFinal.includes('LARGO_EXTERIOR')) {
+                                etiquetaFinal = 'LONG. (±.010)';
+                            } else if (etiquetaFinal.includes('LARGO_INT') || etiquetaFinal.includes('LARGO_INTERIOR')) {
+                                etiquetaFinal = 'DIAM. (B) (+.015)(-.000)';
+                            }
+                        } else {
+                            etiquetaFinal = nombresEtiquetas[k] || k.replace(/_/g, ' ');
+                        }
+
+                        container.innerHTML += `
+                            <div class="flex justify-between border-b border-white/5 pb-1.5 items-center">
+                                <span class="text-gray-400 uppercase text-[10px] tracking-wider">${etiquetaFinal}:</span>
+                                <strong class="text-white font-mono">${valor}</strong>
+                            </div>
+                        `;
+                    }
+                }
+            });
+
+            const alertNoPlano = document.getElementById("noPlanoAlert");
+            const barraDrive = document.getElementById("modalBarraDrive");
+            const tienePlano = b.P && !b.P.toLowerCase().includes("no se cuenta");
+
+            if (tienePlano) {
+                let url = b.P.replace("/view?usp=drivesdk", "/preview").replace("/view", "/preview");
+                iframe.src = url;
+                iframe.classList.remove("hidden");
+                alertNoPlano.classList.add("hidden");
+                barraDrive.classList.remove("hidden");
+                document.getElementById("btnPlanoDirecto").href = b.P;
+            } else {
+                iframe.src = "";
+                iframe.classList.add("hidden");
+                alertNoPlano.classList.remove("hidden");
+                barraDrive.classList.add("hidden");
+            }
+
+            document.getElementById("modalPlano").classList.remove("hidden");
+        }
+
+        function cerrarModalPlano() {
+            document.getElementById("modalPlano").classList.add("hidden");
+            document.getElementById("iframePlano").src = "";
+        }
+
+        function girarPlano() {
+            gradosRotacion = (gradosRotacion + 90) % 360;
+            const iframe = document.getElementById("iframePlano");
+            if (iframe) {
+                iframe.style.transform = `rotate(${gradosRotacion}deg)`;
+                iframe.style.transition = "transform 0.3s ease";
+            }
+        }
+
+        function poblarSelectorTipos() {
+            const select = document.getElementById("filterTipo");
+            select.innerHTML = '<option value="">Todos los Tipos</option>';
+            const tipos = [...new Set(obtenerBujesFiltrados().map(b => b.TIPO))].filter(Boolean).sort();
+            tipos.forEach(t => select.innerHTML += `<option value="${t}">Tipo ${t}</option>`);
+        }
+
+        function poblarSelectorClaves(lista) {
+            const select = document.getElementById("selectClaves");
+            select.innerHTML = '<option value="">Todas las Claves</option>';
+            lista.forEach(b => select.innerHTML += `<option value="${b.CLAVE}">${b.CLAVE} (${b.MATERIAL})</option>`);
+        }
+
+        function alCambiarTipo() {
+            const tipo = document.getElementById("filterTipo").value;
+            let lista = obtenerBujesFiltrados();
+            if (tipo) lista = lista.filter(b => b.TIPO === tipo);
+            poblarSelectorClaves(lista);
+            if (mostrarFichasActivas) renderizarGridBujes(lista);
+        }
+
+        function alEscribirClave(val) {
+            const container = document.getElementById("sugerenciasContainer");
+            if (!val.trim()) { container.classList.add("hidden"); return; }
+            const q = val.toLowerCase();
+            const matches = bujesTodos.filter(b => b.CLAVE.toLowerCase().includes(q)).slice(0, 6);
+            if (matches.length) {
+                container.innerHTML = "";
+                matches.forEach(b => {
+                    container.innerHTML += `<div class="px-4 py-2 hover:bg-schettino-yellow hover:text-black cursor-pointer text-xs font-mono flex justify-between" onclick="document.getElementById('searchInput').value='${b.CLAVE}'; document.getElementById('sugerenciasContainer').classList.add('hidden'); alSeleccionarClave('${b.CLAVE}')"><span><strong>${b.CLAVE}</strong> (${b.MATERIAL})</span></div>`;
+                });
+                container.classList.remove("hidden");
+            } else {
+                container.classList.add("hidden");
+            }
+        }
+
+        function ejecutarBusquedaManual() {
+            const val = document.getElementById("searchInput").value.trim();
+            if (val) alSeleccionarClave(val);
+        }
+
+        function alSeleccionarClave(clave) {
+            if (!clave.trim()) return;
+            ocultarAlertaBuscador();
+            const q = clave.trim().toLowerCase();
+            const found = bujesTodos.find(b => b.CLAVE.toLowerCase() === q);
+
+            if (!found) {
+                if (!mostrarFichasActivas) toggleMostrarFichas(true);
+                renderizarGridBujes([]);
+                mostrarAlertaInexistente(clave);
+                return;
+            }
+
+            if (materialFiltroActual !== 'TODOS' && found.MATERIAL !== materialFiltroActual) {
+                if (!mostrarFichasActivas) toggleMostrarFichas(true);
+                renderizarGridBujes([]);
+                mostrarAlertaMaterialIncorrecto(found.CLAVE, found.MATERIAL);
+                return;
+            }
+
+            if (!mostrarFichasActivas) toggleMostrarFichas(true);
+            renderizarGridBujes([found]);
+        }
+
+        function limpiarFiltros() {
+            ocultarAlertaBuscador();
+            document.getElementById("filterTipo").value = "";
+            document.getElementById("searchInput").value = "";
+            document.getElementById("selectClaves").value = "";
+            const lista = obtenerBujesFiltrados();
+            poblarSelectorClaves(lista);
+            if (mostrarFichasActivas) renderizarGridBujes(lista);
+        }
+
+        function mostrarTodasLasClaves() {
+            renderizarTablaGeneral(obtenerBujesFiltrados());
+        }
+
+        function filtrarTablaGeneral(val) {
+            const q = val.toLowerCase();
+            const filtrados = obtenerBujesFiltrados().filter(b => b.CLAVE.toLowerCase().includes(q) || (b.TIPO && b.TIPO.toLowerCase().includes(q)));
+            renderizarTablaGeneral(filtrados);
+        }
+
+        function ocultarTodasLasClaves() {
+            const tbody = document.getElementById("tbodyGeneral");
+            tbody.innerHTML = "";
+            document.getElementById("infoTotalTabla").innerText = "Registros ocultos.";
+        }
+
+        function abrirModalCrearBuje() {
+            document.getElementById("modalBujeTitulo").innerText = "REGISTRAR NUEVO BUJE";
+            document.getElementById("bujeId").value = "";
+            document.getElementById("inputMaterial").value = "HULE";
+            document.getElementById("inputMaterial").disabled = false;
+            document.getElementById("inputClave").value = "";
+            document.getElementById("inputTipoHule").value = "";
+            document.getElementById("inputDiamExt").value = "";
+            document.getElementById("inputLargoExt").value = "";
+            document.getElementById("inputLargoInt").value = "";
+            document.getElementById("inputDiamInt").value = "";
+            document.getElementById("inputCeja").value = "";
+            document.getElementById("inputDiamA").value = "";
+            document.getElementById("inputDiamB").value = "";
+            document.getElementById("inputLongC").value = "";
+            document.getElementById("inputPlanoUrl").value = "No se cuenta con Plano";
+            cambiarCamposMaterial();
+            document.getElementById("modalBujeForm").classList.remove("hidden");
+        }
+
+        function abrirModalEditarBuje(id, material, clave) {
+            const b = bujesTodos.find(item => (item.ID == id || item.id == id) && item.MATERIAL === material);
+            if (!b) return;
+
+            document.getElementById("modalBujeTitulo").innerText = `EDITAR BUJE (${material}): ${clave}`;
+            document.getElementById("bujeId").value = b.ID || b.id;
+            document.getElementById("inputMaterial").value = material;
+            document.getElementById("inputMaterial").disabled = true;
+            document.getElementById("inputClave").value = b.CLAVE || '';
+            document.getElementById("inputPlanoUrl").value = b.P || '';
+
+            if (material === 'HULE') {
+                document.getElementById("inputTipoHule").value = b.TIPO || '';
+                document.getElementById("inputDiamExt").value = b["DIAMETRO EXTERIOR"] || '';
+                document.getElementById("inputLargoExt").value = b["LARGO EXTERIOR"] || '';
+                document.getElementById("inputLargoInt").value = b["LARGO INTERIOR"] || '';
+                document.getElementById("inputDiamInt").value = b["DIAMETRO INTERIOR"] || '';
+                document.getElementById("inputCeja").value = b.CEJA || '';
+            } else {
+                document.getElementById("inputDiamA").value = b["DIAM. (A) (+.010\")(-.000\")"] || '';
+                document.getElementById("inputDiamB").value = b["DIAM. (B) (+.015\")(-.000\")"] || '';
+                document.getElementById("inputLongC").value = b["LONG. © (±.010\")"] || '';
+            }
+
+            cambiarCamposMaterial();
+            document.getElementById("modalBujeForm").classList.remove("hidden");
+        }
+
+        function cerrarModalBuje() {
+            document.getElementById("modalBujeForm").classList.add("hidden");
+        }
+
+        function cambiarCamposMaterial() {
+            const mat = document.getElementById("inputMaterial").value;
+            const camposHule = document.getElementById("camposHule");
+            const camposBronce = document.getElementById("camposBronce");
+
+            if (mat === 'HULE') {
+                camposHule.classList.remove("hidden");
+                camposBronce.classList.add("hidden");
+            } else {
+                camposHule.classList.add("hidden");
+                camposBronce.classList.remove("hidden");
+            }
+        }
+
+        async function guardarBujeForm(event) {
+            event.preventDefault();
+            const id = document.getElementById("bujeId").value;
+            const material = document.getElementById("inputMaterial").value;
+            const clave = document.getElementById("inputClave").value.trim().toUpperCase();
+            const plano_url = document.getElementById("inputPlanoUrl").value.trim();
+
+            let payload = {};
+            let endpoint = '';
+
+            if (material === 'HULE') {
+                payload = {
+                    clave,
+                    tipo: document.getElementById("inputTipoHule").value.trim().toUpperCase(),
+                    diametro_exterior: document.getElementById("inputDiamExt").value.trim(),
+                    largo_exterior: document.getElementById("inputLargoExt").value.trim(),
+                    largo_interior: document.getElementById("inputLargoInt").value.trim(),
+                    diametro_interior: document.getElementById("inputDiamInt").value.trim(),
+                    ceja: document.getElementById("inputCeja").value.trim(),
+                    plano_url
+                };
+                endpoint = id ? `/api/bujes-hule/${id}` : '/api/bujes-hule';
+            } else {
+                payload = {
+                    clave,
+                    diam_a: document.getElementById("inputDiamA").value.trim(),
+                    diam_b: document.getElementById("inputDiamB").value.trim(),
+                    long_c: document.getElementById("inputLongC").value.trim(),
+                    plano_url
+                };
+                endpoint = id ? `/api/bujes-bronce/${id}` : '/api/bujes-bronce';
+            }
+
+            const method = id ? 'PUT' : 'POST';
+
+            try {
+                const res = await fetch(`${endpoint}`, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    alert(id ? "¡Registro actualizado exitosamente!" : "¡Buje creado exitosamente!");
+                    location.reload();
+                } else {
+                    alert("Error: " + data.message);
+                }
+            } catch (err) {
+                alert("Error de conexión con el servidor.");
+            }
+        }
+
+        async function abrirModalUsuarios() {
+            try {
+                const res = await fetch('/api/usuarios');
+                const usuarios = await res.json();
+                
+                const container = document.getElementById("listaUsuariosContainer");
+                container.innerHTML = "";
+
+                usuarios.forEach(u => {
+                    const row = document.createElement("div");
+                    row.className = "flex flex-col sm:flex-row justify-between items-start sm:items-center bg-black/40 p-3 rounded-lg border border-white/5 gap-2";
+                    
+                    const infoDiv = document.createElement("div");
+                    infoDiv.innerHTML = `
+                        <span class="text-white font-bold">${u.username}</span> 
+                        <span class="text-[10px] text-gray-400">(${u.email})</span>
+                        <span class="ml-2 px-2 py-0.5 rounded bg-schettino-yellow/20 text-schettino-yellow text-[9px]">${u.rol.toUpperCase()}</span>
+                    `;
+                    row.appendChild(infoDiv);
+
+                    const actionsDiv = document.createElement("div");
+                    actionsDiv.className = "flex items-center space-x-2";
+
+                    // Botón Cambiar Clave limpio sin errores de comillas en HTML
+                    const btnKey = document.createElement("button");
+                    btnKey.className = "text-schettino-yellow hover:text-white bg-white/10 hover:bg-schettino-yellow/20 px-2.5 py-1 rounded text-[10px] transition-all";
+                    btnKey.innerHTML = '<i class="fas fa-key mr-1"></i> Cambiar Clave';
+                    // Modificado para abrir el modal corporativo en vez de usar prompt()
+                    btnKey.onclick = () => abrirModalPassword(u.id, u.username);
+                    actionsDiv.appendChild(btnKey);
+
+                    if (u.username !== 'admin') {
+                        const btnDel = document.createElement("button");
+                        btnDel.className = "text-red-400 hover:text-red-600 px-2 py-1";
+                        btnDel.innerHTML = '<i class="fas fa-trash text-xs"></i>';
+                        btnDel.onclick = () => eliminarUsuario(u.id);
+                        actionsDiv.appendChild(btnDel);
+                    } else {
+                        const spanProt = document.createElement("span");
+                        spanProt.className = "text-[9px] text-gray-500";
+                        spanProt.textContent = "Protegido";
+                        actionsDiv.appendChild(spanProt);
+                    }
+
+                    row.appendChild(actionsDiv);
+                    container.appendChild(row);
+                });
+
+                document.getElementById("modalUsuarios").classList.remove("hidden");
+            } catch (err) {
+                console.error("Error al cargar usuarios:", err);
+                alert("No se pudieron cargar los usuarios.");
+            }
+        }
+
+        function cerrarModalUsuarios() {
+            document.getElementById("modalUsuarios").classList.add("hidden");
+        }
+
+        async function crearNuevoUsuarioForm(event) {
+            event.preventDefault();
+            const username = document.getElementById("nuevoUser").value.trim();
+            const email = document.getElementById("nuevoEmail").value.trim();
+            const password = document.getElementById("nuevoPass").value.trim();
+            const rol = document.getElementById("nuevoRol").value;
+
+            try {
+                const res = await fetch('/api/usuarios', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, email, password, rol })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert("Usuario registrado correctamente.");
+                    abrirModalUsuarios();
+                } else {
+                    alert("Error: " + data.message);
+                }
+            } catch (err) {
+                alert("Error de conexión al registrar usuario.");
+            }
+        }
+
+        async function eliminarUsuario(id) {
+            if (!confirm("¿Está seguro de eliminar este usuario?")) return;
+            try {
+                const res = await fetch(`/api/usuarios/${id}`, { method: 'DELETE' });
+                const data = await res.json();
+                if (data.success) {
+                    abrirModalUsuarios();
+                } else {
+                    alert("No se pudo eliminar el usuario.");
+                }
+            } catch (err) {
+                alert("Error de conexión.");
+            }
+        }
+
+        async function eliminarBuje(id, material) {
+            if (!confirm(`¿Está seguro de eliminar este registro de buje de ${material} de la base de datos?`)) return;
+            
+            const endpoint = material.toUpperCase() === 'HULE' ? `/api/bujes-hule/${id}` : `/api/bujes-bronce/${id}`;
+
+            try {
+                const response = await fetch(`${endpoint}`, {
+                    method: 'DELETE'
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    alert("¡Registro eliminado correctamente de la Base de Datos!");
+                    location.reload(); 
+                } else {
+                    alert("Error al eliminar el registro: " + (data.message || 'Error desconocido'));
+                }
+            } catch (err) {
+                console.error("Error de conexión:", err);
+                alert("Error de conexión con el servidor.");
+            }
+        }
+
+
+        async function cambiarPasswordUsuario(id, username) {
+            console.log("Iniciando cambio de contraseña para:", username, "con ID:", id);
+            
+            const nuevaPassword = prompt(`Ingrese la nueva contraseña para el usuario "${username}":`);
+            if (!nuevaPassword) return;
+
+            if (nuevaPassword.length < 4) {
+                alert("La contraseña debe tener al menos 4 caracteres.");
+                return;
+            }
+
+            try {
+                console.log(`Enviando petición PUT a /api/usuarios/${id}/password`);
+                const res = await fetch(`/api/usuarios/${id}/password`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nuevoPassword })
+                });
+                
+                const data = await res.json();
+                console.log("Respuesta del servidor:", data);
+
+                if (data.success) {
+                    alert("¡Contraseña actualizada correctamente!");
+                } else {
+                    alert("Error: " + data.message);
+                }
+            } catch (err) {
+                console.error("Error de conexión al cambiar contraseña:", err);
+                alert("Error de conexión con el servidor.");
+            }
+        }
+
+
+        function abrirModalPassword(id, username) {
+            document.getElementById("passUserId").value = id;
+            document.getElementById("modalPassTitulo").textContent = `CAMBIAR CONTRASEÑA: ${username.toUpperCase()}`;
+            document.getElementById("inputNuevaPass").value = "";
+            document.getElementById("inputConfirmarPass").value = "";
+            document.getElementById("passErrorMsg").classList.add("hidden");
+            document.getElementById("modalCambiarPassword").classList.remove("hidden");
+        }
+
+        function cerrarModalPassword() {
+            document.getElementById("modalCambiarPassword").classList.add("hidden");
+        }
+
+        async function ejecutarCambioPassword(event) {
+    event.preventDefault();
+    const id = document.getElementById("passUserId").value;
+    const nuevaPassword = document.getElementById("inputNuevaPass").value;
+    const confirmarPassword = document.getElementById("inputConfirmarPass").value;
+    const errorDiv = document.getElementById("passErrorMsg");
+    const errorText = document.getElementById("passErrorText");
+
+    const mostrarError = (msg) => {
+        errorText.textContent = msg;
+        errorDiv.classList.remove("hidden");
+    };
+
+    if (nuevaPassword !== confirmarPassword) return mostrarError("Las contraseñas no coinciden.");
+    if (nuevaPassword.length < 4) return mostrarError("La contraseña debe tener al menos 4 caracteres.");
+    if (!id) return mostrarError("No se recibió el ID del usuario.");
+
+    errorDiv.classList.add("hidden");
+
+    let res;
+    try {
+        res = await fetch(`/api/usuarios/${id}/password`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ nuevoPassword: nuevaPassword })
+        });
+    } catch (err) {
+        console.error("Fallo de red:", err);
+        return mostrarError("No se pudo contactar al servidor (¿está corriendo en el puerto 3000?).");
+    }
+
+    const texto = await res.text();
+    let data;
+    try {
+        data = JSON.parse(texto);
+    } catch {
+        console.error("Respuesta no-JSON:", res.status, texto);
+        return mostrarError(`El servidor respondió ${res.status} y no con JSON. Reinicia server.js.`);
+    }
+
+    if (data.success) {
+        alert("¡Contraseña actualizada correctamente!");
+        cerrarModalPassword();
+    } else {
+        mostrarError(data.message || "Error al actualizar la contraseña.");
+    }
+}
+
+    </script>
+</body>
+</html>

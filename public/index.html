@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceso | Buscador de Bujes Interno Schettino</title>
+    <link rel="icon" type="image/png" href="https://i.ibb.co/CpXzP1GB/ISOTIPO-2.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Syncopate:wght@700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { schettino: { yellow: '#f3be12', dark: '#0d0d0d', card: '#141414' } },
+                    fontFamily: { industrial: ['Syncopate', 'sans-serif'], sans: ['Inter', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #0d0d0d; color: #e5e5e5; font-family: 'Inter', sans-serif; }
+        .glass-panel { background: rgba(20, 20, 20, 0.85); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .logo-glow { filter: drop-shadow(0px 0px 8px rgba(243, 190, 18, 0.45)); }
+        @keyframes spinSlow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .spin-isotipo { animation: spinSlow 4s linear infinite; }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 selection:bg-schettino-yellow selection:text-black">
+
+    <div class="glass-panel max-w-md w-full p-8 rounded-3xl border border-schettino-yellow/30 shadow-2xl text-center relative">
+        <div class="w-20 h-20 mx-auto mb-4 relative flex items-center justify-center">
+            <img src="https://i.ibb.co/CpXzP1GB/ISOTIPO-2.png" alt="Schettino" class="w-16 h-16 object-contain spin-isotipo logo-glow">
+        </div>
+        
+        <p class="font-industrial text-xs text-schettino-yellow tracking-widest uppercase mb-1">FÁBRICA DE BUJES SCHETTINO</p>
+        <h2 class="font-industrial text-xl text-white font-bold mb-2">SISTEMA PRIVADO INTERNO</h2>
+        <p class="text-xs text-gray-400 mb-6">Ingrese sus credenciales corporativas autorizadas.</p>
+
+        <form id="formAuth" onsubmit="realizarLogin(event)" class="space-y-4 text-left">
+            <div>
+                <label class="block text-[10px] font-industrial text-schettino-yellow mb-1">USUARIO</label>
+                <div class="relative">
+                    <i class="fas fa-user absolute left-4 top-1/2 -translate-y-1/2 text-schettino-yellow/70 text-sm"></i>
+                    <input type="text" id="userInput" placeholder="Usuario..." required
+                           class="w-full pl-11 pr-4 py-3 bg-black/80 border border-white/20 rounded-xl text-white text-sm focus:border-schettino-yellow focus:outline-none transition-all font-mono">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-[10px] font-industrial text-schettino-yellow mb-1">CONTRASEÑA</label>
+                <div class="relative">
+                    <i class="fas fa-key absolute left-4 top-1/2 -translate-y-1/2 text-schettino-yellow/70 text-sm"></i>
+                    <input type="password" id="passInput" placeholder="Contraseña..." required
+                           class="w-full pl-11 pr-12 py-3 bg-black/80 border border-white/20 rounded-xl text-white text-sm focus:border-schettino-yellow focus:outline-none transition-all font-mono">
+                    <button type="button" onclick="togglePasswordVisibility()" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-schettino-yellow">
+                        <i id="eyeIcon" class="fas fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div id="authErrorMsg" class="hidden text-xs text-red-400 font-mono bg-red-950/40 border border-red-500/30 py-2 px-3 rounded-lg flex items-center space-x-2">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span id="errorText">Usuario o contraseña incorrectos.</span>
+            </div>
+
+            <button type="submit" class="w-full py-3.5 bg-schettino-yellow hover:bg-yellow-400 text-black font-industrial text-xs font-bold rounded-xl transition-all shadow-lg shadow-schettino-yellow/20 flex items-center justify-center space-x-2">
+                <i class="fas fa-lock-open"></i>
+                <span>INGRESAR AL SISTEMA</span>
+            </button>
+        </form>
+    </div>
+
+    <script>
+        function togglePasswordVisibility() {
+            const input = document.getElementById("passInput");
+            const icon = document.getElementById("eyeIcon");
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.remove("fa-eye");
+                icon.classList.add("fa-eye-slash");
+            } else {
+                input.type = "password";
+                icon.classList.remove("fa-eye-slash");
+                icon.classList.add("fa-eye");
+            }
+        }
+
+        async function realizarLogin(event) {
+        event.preventDefault();
+        const username = document.getElementById("userInput").value.trim();
+        const password = document.getElementById("passInput").value.trim();
+        const errorMsg = document.getElementById("authErrorMsg");
+        const errorText = document.getElementById("errorText");
+
+        try {
+            const response = await fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                // Guardamos la sesión y el rol devuelto por Supabase en el navegador
+                localStorage.setItem("usuarioSchettino", JSON.stringify(data.user));
+                // Redirigir al panel principal del sistema
+                window.location.href = 'dashboard.html';
+            } else {
+                errorText.textContent = data.message || 'Credenciales inválidas';
+                errorMsg.classList.remove("hidden");
+            }
+        } catch (err) {
+            errorText.textContent = 'No se pudo conectar con el servidor.';
+            errorMsg.classList.remove("hidden");
+        }
+    }
+    </script>
+</body>
+</html>
